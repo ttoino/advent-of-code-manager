@@ -27,19 +27,37 @@ def get(args):
     p = Path(f"day{int(args.day):02}/")
     p.mkdir(exist_ok=True)
 
-    desc = get_description(args)
-    with open(str(p / "README.md"), "w") as f:
-        f.write(desc)
+    if not (p / "README.md").exists():
+        desc = get_description(args)
+        with open(str(p / "README.md"), "w") as f:
+            f.write(desc)
 
-    inp = get_input(args)
-    with open(str(p / "input"), "w") as f:
-        f.write(inp)
+    if not (p / "input").exists():
+        inp = get_input(args)
+        with open(str(p / "input"), "w") as f:
+            f.write(inp)
 
     templates = Path(__file__).parent / "templates"
     if not (p / "part1.py").exists():
         copy(templates / "part1.py", p / "part1.py")
     if not (p / "part2.py").exists():
         copy(templates / "part2.py", p / "part2.py")
+
+
+def update(args):
+    f = open("README.md", "r")
+    fd = f.read()
+    f.close()
+
+    fd = fd.replace("{year}", args.year)
+
+    p = get_daily_progress(args)
+    for i in range(1, 26):
+        fd = fd.replace(f"{{day{i:02}}}", p[i])
+
+    f = open("README.md", "w")
+    f.write(fd)
+    f.close()
 
 
 def init(args):
@@ -67,23 +85,15 @@ def init(args):
     copy(templates / "LICENSE", "LICENSE")
     copy(templates / ".gitignore", ".gitignore")
 
-    f = open("README.md", "r")
-    fd = f.read()
-    f.close()
-
-    fd = fd.replace("{year}", args.year)
-
-    p = get_daily_progress(args)
-    for i in range(1, 26):
-        fd = fd.replace(f"{{day{i:02}}}", p[i])
-
-    f = open("README.md", "w")
-    f.write(fd)
-    f.close()
+    update(args)
 
     for i in range(1, 26):
+        print(f"\r\x1B[KGetting day {i}!", end="")
+
         args.day = i
         get(args)
+
+    print(f"\r\x1B[KDone!")
 
 
 def create_parser():
@@ -96,6 +106,9 @@ def create_parser():
 
     parser_init = subparsers.add_parser("init")
     parser_init.set_defaults(func=init)
+
+    parser_init = subparsers.add_parser("update")
+    parser_init.set_defaults(func=update)
 
     parser_events = subparsers.add_parser("events")
     parser_events.set_defaults(func=events)
