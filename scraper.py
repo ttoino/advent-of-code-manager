@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 from html2md import html2md
+import re
 
 
 def request(args, method: str, url: str, **kwargs):
@@ -31,9 +32,19 @@ def get_progress(args):
     for c in calendar.select(
             ":not(:is(.calendar-verycomplete, .calendar-complete)) > .calendar-mark-complete,"
             ":not(.calendar-verycomplete) > .calendar-mark-verycomplete"):
-        c.decompose()
+        c.replace_with(" ")
 
     return calendar.text
+
+
+def get_daily_progress(args):
+    p = get_progress(args).splitlines()
+
+    return {
+        int(d[0]): i[-2:].replace(" ", "☆").replace("*", "★")
+        for i in p
+        if (d := re.search(r"\d{1,2}", i))
+    }
 
 
 def get_description(args):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from shutil import copy
-from scraper import get_available_events, get_description, get_input, get_progress
+from scraper import get_available_events, get_daily_progress, get_description, get_input, get_progress
 from configargparse import ArgumentParser
 
 
@@ -73,6 +73,10 @@ def init(args):
 
     fd = fd.replace("{year}", args.year)
 
+    p = get_daily_progress(args)
+    for i in range(1, 26):
+        fd = fd.replace(f"{{day{i:02}}}", p[i])
+
     f = open("README.md", "w")
     f.write(fd)
     f.close()
@@ -86,6 +90,7 @@ def create_parser():
     parser = ArgumentParser(prog="aocm", default_config_files=[".aocm"])
     parser.add_argument("--session", help="Session cookie")
     parser.add_argument("--year", help="Advent of code year")
+    parser.set_defaults(func=lambda x: parser.print_help())
 
     subparsers = parser.add_subparsers()
 
