@@ -71,7 +71,7 @@ def submit_answer(args, answer):
                   "post",
                   f"https://adventofcode.com/{args.year}/day/{args.day}/answer",
                   data={
-                      "level": args.day,
+                      "level": args.part,
                       "answer": answer
                   })
     scraper = BeautifulSoup(res.content, "html.parser")

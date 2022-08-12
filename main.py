@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from shutil import copy
-from scraper import get_available_events, get_daily_progress, get_description, get_input, get_progress
+from scraper import get_available_events, get_daily_progress, get_description, get_input, get_progress, submit_answer
 from configargparse import ArgumentParser
+import subprocess
 
 
 def events(args):
@@ -19,8 +20,32 @@ def progress(args):
     print(progress)
 
 
+def test(args):
+    if subprocess.call([f"python3 part{args.part}.py"],
+                       cwd=f"day{args.day:02}",
+                       shell=True) != 0:
+        return
+
+    outf = open(f"day{int(args.day):02}/part{args.part}.out")
+    answer = outf.readline().strip()
+    outf.close()
+
+    print(answer)
+
+
 def submit(args):
-    pass
+    if subprocess.call([f"python3 part{args.part}.py"],
+                       cwd=f"day{args.day:02}",
+                       shell=True) != 0:
+        return
+
+    outf = open(f"day{int(args.day):02}/part{args.part}.out")
+    answer = outf.readline().strip()
+    outf.close()
+
+    print(submit_answer(args, answer))
+
+    update(args)
 
 
 def get(args):
@@ -58,6 +83,12 @@ def update(args):
     f = open("README.md", "w")
     f.write(fd)
     f.close()
+
+    if args.day:
+        get(args)
+        desc = get_description(args)
+        with open(f"day{int(args.day):02}/README.md", "w") as f:
+            f.write(desc)
 
 
 def init(args):
@@ -107,8 +138,9 @@ def create_parser():
     parser_init = subparsers.add_parser("init")
     parser_init.set_defaults(func=init)
 
-    parser_init = subparsers.add_parser("update")
-    parser_init.set_defaults(func=update)
+    parser_update = subparsers.add_parser("update")
+    parser_update.set_defaults(func=update)
+    parser_update.add_argument("day", type=int, nargs="?")
 
     parser_events = subparsers.add_parser("events")
     parser_events.set_defaults(func=events)
@@ -118,11 +150,17 @@ def create_parser():
 
     parser_submit = subparsers.add_parser("submit")
     parser_submit.set_defaults(func=submit)
-    parser_submit.add_argument("day")
+    parser_submit.add_argument("day", type=int)
+    parser_submit.add_argument("part", choices=["1", "2"])
+
+    parser_test = subparsers.add_parser("test")
+    parser_test.set_defaults(func=test)
+    parser_test.add_argument("day", type=int)
+    parser_test.add_argument("part", choices=["1", "2"])
 
     parser_get = subparsers.add_parser("get")
     parser_get.set_defaults(func=get)
-    parser_get.add_argument("day")
+    parser_get.add_argument("day", type=int)
 
     return parser
 
