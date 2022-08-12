@@ -1,7 +1,13 @@
 import bs4
+import re
+from urllib.parse import urljoin
 
 
-def html2md(html: bs4.element.Tag, part: int):
+def html2md(html: bs4.element.Tag, part: int, base_url: str):
+    for d in html.find_all(text=True):
+        d: bs4.NavigableString
+        d.replace_with(d.replace("*", "\\*").replace("`", "\\`"))
+
     for h in html.select("h2"):
         h.replace_with(
             f"{'#' * part} {h.text.removeprefix('--- ').removesuffix(' ---')}\n\n"
@@ -15,10 +21,12 @@ def html2md(html: bs4.element.Tag, part: int):
                 b.replace_with(f"<strong>{b.text}</strong>")
             pre.replace_with(f"<pre><code>{pre.text}</code></pre>\n")
         else:
-            pre.replace_with(f"```\n{pre.text}```\n")
+            t = pre.text + ('' if pre.text.endswith('\n') else '\n')
+            pre.replace_with(f"```\n{t}```\n")
 
     for a in html.select("a"):
-        a.replace_with(f"[{a.text}]({a.attrs['href']})")
+        url = urljoin(base_url, a.attrs['href'])
+        a.replace_with(f"[{a.text}]({url})")
 
     for c in html.select("code"):
         b = c.select("em")
@@ -40,12 +48,12 @@ def html2md(html: bs4.element.Tag, part: int):
         for li in l.select(":scope > li"):
             for ll in li.select(":scope > ul"):
                 for lli in ll.select(":scope > li"):
-                    lli.replace_with(f"  - {lli.text}")
+                    lli.replace_with(f"  - {lli.text.replace('  ', ' ')}")
                 ll.replace_with(ll.text.removesuffix("\n"))
-            li.replace_with(f"- {li.text}")
+            li.replace_with(f"- {re.sub(r'  (?!-)', ' ', li.text)}")
         l.replace_with(l.text.removeprefix("\n"))
 
     for p in html.select("p"):
-        p.replace_with(f"{p.text}\n")
+        p.replace_with(f"{p.text.replace('  ', ' ')}\n")
 
     return html.text.removesuffix("\n")

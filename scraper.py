@@ -48,14 +48,14 @@ def get_daily_progress(args):
 
 
 def get_description(args):
-    scraper = create_scraper(
-        args, f"https://adventofcode.com/{args.year}/day/{args.day}")
+    base_url = f"https://adventofcode.com/{args.year}/day/{args.day}"
+    scraper = create_scraper(args, base_url)
     descs = scraper.select("article.day-desc")
 
-    desc = html2md(descs[0], 1)
+    desc = html2md(descs[0], 1, base_url)
 
     if len(descs) > 1:
-        desc += "\n" + html2md(descs[1], 2)
+        desc += "\n" + html2md(descs[1], 2, base_url)
 
     return desc
 
