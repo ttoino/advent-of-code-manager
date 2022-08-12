@@ -70,6 +70,9 @@ def get(args):
 
 
 def update(args):
+    templates = Path(__file__).parent / "templates"
+    copy(templates / "README.md", "README.md")
+
     f = open("README.md", "r")
     fd = f.read()
     f.close()
@@ -112,7 +115,6 @@ def init(args):
         cfg_file.write(f"year={args.year}\nsession={args.session}\n")
 
     templates = Path(__file__).parent / "templates"
-    copy(templates / "README.md", "README.md")
     copy(templates / "LICENSE", "LICENSE")
     copy(templates / ".gitignore", ".gitignore")
 
