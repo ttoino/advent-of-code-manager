@@ -33,13 +33,15 @@ def html2md(html: bs4.element.Tag, part: int, base_url: str):
 
         if b:
             if len(b) == 1 and b[0].text == c.text:
-                c.replace_with(f"**`{c.text}`**")
+                t = c.text.replace('\\*', '*')
+                c.replace_with(f"**`{t}`**")
             else:
                 for b in b:
                     b.replace_with(f"<strong>{b.text}</strong>")
                 c.replace_with(f"<code>{c.text}</code>")
         else:
-            c.replace_with(f"`{c.text}`")
+            t = c.text.replace('\\*', '*')
+            c.replace_with(f"`{t}`")
 
     for b in html.select("em"):
         b.replace_with(f"**{b.text}**")
