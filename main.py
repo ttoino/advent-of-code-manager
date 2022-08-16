@@ -87,7 +87,7 @@ def update(args):
     f.write(fd)
     f.close()
 
-    if args.day:
+    if "day" in args:
         get(args)
         desc = get_description(args)
         with open(f"day{int(args.day):02}/README.md", "w") as f:
