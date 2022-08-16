@@ -43,7 +43,7 @@ def get_daily_progress(args):
     return {
         int(d[0]): i[-2:].replace(" ", "☆").replace("*", "★")
         for i in p
-        if (d := re.search(r"\d{1,2}", i))
+        if (d := re.search(r"\d{1,2} (?:\*| ){2}", i))
     }
 
 
