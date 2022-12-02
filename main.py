@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from shutil import copy
-from scraper import get_available_events, get_daily_progress, get_description, get_input, get_progress, submit_answer
+from scraper import get_available_days, get_available_events, get_daily_progress, get_description, get_input, get_progress, submit_answer
 from configargparse import ArgumentParser
 import subprocess
 
@@ -81,7 +81,7 @@ def update(args):
 
     p = get_daily_progress(args)
     for i in range(1, 26):
-        fd = fd.replace(f"{{day{i:02}}}", p[i])
+        fd = fd.replace(f"{{day{i:02}}}", p.get(i, ''))
 
     f = open("README.md", "w")
     f.write(fd)
@@ -120,7 +120,7 @@ def init(args):
 
     update(args)
 
-    for i in range(1, 26):
+    for i in range(1, get_available_days(args) + 1):
         print(f"\r\x1B[KGetting day {i}!", end="")
 
         args.day = i

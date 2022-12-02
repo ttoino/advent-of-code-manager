@@ -18,6 +18,14 @@ def create_scraper(args, url: str):
     return scraper
 
 
+def get_available_days(args):
+    scraper = create_scraper(args, f"https://adventofcode.com/{args.year}")
+    calendar = scraper.select_one(".calendar")
+    links = calendar.select('a')
+
+    return len(links)
+
+
 def get_available_events(args):
     scraper = create_scraper(args, "https://adventofcode.com/events")
 
